@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>eMotion-GAN: Photorealistic and Facial Expression Preserving Frontal View Synthesis</title>
+  <style>
+    /* Reset and base */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0; padding: 0;
+      background: #f7f7f7;
+      color: #222;
+      line-height: 1.6;
+    }
+    a {
+      text-decoration: none;
+      color: #0066cc;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Title & Authors */
+    header {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    header h1 {
+      font-size: 2.8rem;
+      margin-bottom: 5px;
+      color: #0a3d62;
+    }
+    header .subtitle {
+      font-size: 1.2rem;
+      color: #555;
+      margin-bottom: 15px;
+      font-weight: 300;
+    }
+    header p.authors {
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin: 0;
+    }
+    header p.affiliation {
+      font-style: italic;
+      font-size: 1rem;
+      color: #555;
+      margin-top: 3px;
+    }
+
+    /* Buttons row */
+    .btn-row {
+      margin: 25px 0;
+      text-align: center;
+    }
+    .btn {
+      background-color: #333;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      margin: 6px;
+      font-size: 1rem;
+      font-weight: 300;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      display: inline-block;
+    }
+    .btn:hover {
+      background-color: #065cb3;
+    }
+
+    /* Sections */
+    section {
+      background: white;
+      padding: 20px 25px;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+      margin-bottom: 30px;
+    }
+    section h2 {
+      margin-top: 0;
+      color: #0a3d62;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 10px;
+    }
+
+    /* Images and videos */
+    section img,
+    section video {
+      max-width: 100%;
+      display: block;
+      margin: 20px auto;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgb(0 0 0 / 0.15);
+    }
+    
+    .center-image {
+      text-align: center;
+      margin: 25px 0;
+    }
+    .center-image img {
+      max-width: 90%;
+      border-radius: 8px;
+    }
+
+    /* Video thumbnail */
+    .video-thumbnail {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+      max-width: 100%;
+    }
+    .video-thumbnail:hover:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.1);
+      border-radius: 8px;
+    }
+
+    /* Horizontal scroll for demos */
+    .video-scroll-container {
+      margin: 30px 0;
+      overflow-x: auto;
+      white-space: nowrap;
+      padding-bottom: 15px;
+    }
+    .video-scroll-container figure {
+      display: inline-block;
+      margin-right: 20px;
+      vertical-align: top;
+      white-space: normal;
+      width: 300px;
+      text-align: center;
+    }
+    .video-scroll-container img {
+      width: 300px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 6px;
+      box-shadow: 0 2px 5px rgb(0 0 0 / 0.1);
+    }
+    .video-scroll-container figcaption {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #555;
+      width: 300px;
+      white-space: normal;
+      line-height: 1.4;
+    }
+
+    /* Two-column layout */
+    .two-column {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin: 25px 0;
+    }
+    @media (max-width: 768px) {
+      .two-column {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* BibTeX */
+    .bibtex {
+      background: #333;
+      color: #eee;
+      font-family: monospace;
+      padding: 20px 25px;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      margin-bottom: 50px;
+      overflow-x: auto;
+    }
+    .bibtex h2 {
+      color: #fff;
+      border-bottom: 1px solid #555;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #666;
+      padding: 15px 10px;
+      border-top: 1px solid #ddd;
+      margin-top: 40px;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 2rem;
+      }
+      .btn {
+        padding: 10px 18px;
+        font-size: 0.9rem;
+      }
+      .video-scroll-container figure {
+        width: 250px;
+      }
+      .video-scroll-container img {
+        /*width: 250px;*/
+        height: 160px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>eMotion-GAN</h1>
+      <div class="subtitle">A Motion-based GAN for Photorealistic and Facial Expression Preserving Frontal View Synthesis</div>
+      <p class="authors">Omar Ikne, Benjamin Allaert, Ioan Marius Bilasco, Hazem Wannous</p>
+      <p class="affiliation">IMT Nord Europe, Institut Mines-Télécom, Univ. Lille, Centre for Digital Systems, F-59000 Lille, France.</p>
+    </header>
+
+    <div class="btn-row">
+      <a href="https://arxiv.org/abs/2404.09940" target="_blank" class="btn">Paper</a>
+      <a href="https://github.com/yourusername/eMotion-GAN" target="_blank" class="btn">Code</a>
+      <a href="https://colab.research.google.com/drive/1KTyN7DJnI5P_1HMoEiSBmw-IWWkCR5Jc?usp=sharing" target="_blank" class="btn">Colab Demo</a>
+      <a href="#citation" class="btn">Citation</a>
+    </div>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        <strong>eMotion-GAN</strong> is a novel motion‑based Generative Adversarial Network for photorealistic frontal view synthesis that preserves facial expressions. Our approach disentangles facial motion from identity and appearance, enabling high‑quality frontalization while maintaining the original expression dynamics. The method demonstrates state‑of‑the‑art performance on frontal view synthesis and cross‑subject facial motion transfer.
+      </p>
+      <div class="center-image">
+        <img src="images/our_new_approach.png" alt="eMotion-GAN pipeline overview" />
+        <p><em>Overview of the eMotion-GAN framework</em></p>
+      </div>
+      
+      <h2>Abstract</h2>
+      <p>
+	Facial expression recognition (FER) systems frequently suffer significant performance degradation when confronted with head pose variations, a pervasive challenge in real-world applications ranging from healthcare monitoring to human–computer interaction. While existing frontal view synthesis (FVS) methods attempt to address this issue, they predominantly operate in the appearance domain, often introducing artifacts that distort the subtle motion patterns crucial for accurate expression analysis. We present eMotion-GAN, a two-stage generative motion-domain framework that fundamentally rethinks frontalization by decomposing facial dynamics into two distinct components: (1) expression-related motion stemming from muscle activity, and (2) pose-related motion acting as noise. We conducted extensive evaluations using several widely recognized dynamic FER datasets, which encompass sequences exhibiting various degrees of head pose variations in both intensity and orientation. Our results demonstrate the effectiveness of our approach in significantly reducing the FER performance gap between frontal and non-frontal faces. Specifically, we achieved a FER improvement of up to +5% for small pose variations and up to +20% improvement for larger pose variations.
+	</p>
+    </section>
+
+    <section>
+      <h2>Explainer Video</h2>
+      <p>Watch our explainer video for detailed explanations and more results:</p>
+	   <div class="container is-max-desktop">
+	    <div class="hero-body">
+	      <video poster="" id="" autoplay="" controls="" muted="" loop="" playsinline="" height="100%">
+		<source src="images/supplementary_video.mp4" type="video/mp4">
+	      </video>
+	    </div>
+	  </div>
+  
+    </section>
+
+    <section>
+      <h2>Interactive Demo</h2>
+      <p>
+        Try our interactive visualization demo using Google Colab (no GPU needed):
+      </p>
+      <div class="center-image">
+        <a href="https://colab.research.google.com/drive/1KTyN7DJnI5P_1HMoEiSBmw-IWWkCR5Jc?usp=sharing" target="_blank">
+          <img src="images/colab_demo.png" alt="Colab demo animation" style="max-width: 500px;" />
+        </a>
+      </div>
+      <p style="text-align: center;">
+        <a href="https://colab.research.google.com/drive/1KTyN7DJnI5P_1HMoEiSBmw-IWWkCR5Jc?usp=sharing" target="_blank" class="btn">Open Colab Demo</a>
+      </p>
+    </section>
+
+    <section>
+      <h2>Frontal View Synthesis & Expression Preservation</h2>
+      <p>
+        eMotion-GAN generates photorealistic frontal views while preserving the original facial expressions, even under extreme poses and lighting conditions.
+      </p>
+      <div class="center-image">
+        <img src="images/resu_compar.png" alt="Frontal view synthesis results comparison" />
+        <p><em>Comparison of frontalization results with state‑of‑the‑art methods</em></p>
+      </div>
+      
+      <div class="center-image">
+        <img src="images/anim.gif" alt="Frontal view synthesis animation" />
+        <p><em>Motion Frontalization & Expression Embedding</em></p>
+      </div>
+      
+    </section>
+
+    <section>
+      <h2>Cross-subject Facial Motion Transfer</h2>
+      <p>
+        Our model can transfer facial motion from a source subject to a target subject while maintaining the target's identity and the source's expression dynamics.
+      </p>
+        <div class="center-image">
+          <img src="images/motion_transfer.png" alt="Motion transfer results" />
+          <p><em>Motion transfer examples</em></p>
+        </div>
+    </section>
+
+<section class="section animate-fade-in-up">
+  <h2>Cross-Category Animation Examples</h2>
+  <p>Our approach demonstrates remarkable generalization capability by animating faces across diverse categories while preserving expression dynamics:</p>
+  
+  <div class="animation-grid">
+    <div class="animation-item">
+      <div class="animation-wrapper">
+        <img src="images/anim_MT.gif" alt="Artwork face animation - transferring facial expressions to classical artwork portraits" />
+      </div>
+      <div class="animation-caption">
+        <strong>Artworks:</strong> Expression transfer to classical portrait paintings
+      </div>
+    </div>
+    
+    <div class="animation-item">
+      <div class="animation-wrapper">
+        <img src="images/anim_MT_celeb.gif" alt="Celebrity face animation - motion transfer on celebrity photographs" />
+      </div>
+      <div class="animation-caption">
+        <strong>Celebrities:</strong> Motion transfer on real-world celebrity faces
+      </div>
+    </div>
+    
+    <div class="animation-item">
+      <div class="animation-wrapper">
+        <img src="images/anim_MT_cartoon.gif" alt="Cartoon character animation - applying realistic expressions to animated characters" />
+      </div>
+      <div class="animation-caption">
+        <strong>Cartoons:</strong> Realistic expression application to animated characters
+      </div>
+    </div>
+    
+    <div class="animation-item">
+      <div class="animation-wrapper">
+        <img src="images/anim_MT_draw.gif" alt="Drawing animation - bringing sketch and drawing faces to life" />
+      </div>
+      <div class="animation-caption">
+        <strong>Drawings:</strong> Animating sketch and illustration faces
+      </div>
+    </div>
+  </div>
+  
+</section>
+
+    <section id="citation">
+      <h2>Citation</h2>
+      <p>If you find this work useful, please cite our paper:</p>
+      <div class="bibtex">
+@article{ikne2025emotion,
+  title={eMotion-GAN: A motion-based GAN for photorealistic and facial expression preserving frontal view synthesis},
+  author={Ikne, Omar and Allaert, Benjamin and Bilasco, Ioan Marius and Wannous, Hazem},
+  journal={Computer Vision and Image Understanding},
+  pages={104555},
+  year={2025},
+  publisher={Elsevier}
+}
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    &copy; 2025 Omar Ikne, Benjamin Allaert, Ioan Marius Bilasco, Hazem Wannous — eMotion-GAN Project
+  </footer>
+
+</body>
+</html>
